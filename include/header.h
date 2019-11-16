@@ -86,7 +86,7 @@ typedef struct regi {
 
 /************************************************ Struct para las expresions */
 typedef struct exp {
-    int desp;
+    int pos;
     int tipo;
 } EXP;
 
