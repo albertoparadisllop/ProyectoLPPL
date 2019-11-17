@@ -271,7 +271,7 @@ expresionSufija
         ;
 /****************************************************************************/
 constante
-        : CTE_         {$$.tipo = T_ENTERO; $$.pos = $1;} 
+        : CTE_         {$$.tipo = T_ENTERO; $$.pos = $1;} // Creo que las asignaciones de pos aqui no tienen sentido
         | TRUE_        {$$.tipo = T_LOGICO; $$.pos = 1;}
         | FALSE_       {$$.tipo = T_LOGICO; $$.pos = 0;} 
         ;
@@ -285,42 +285,42 @@ operadorAsignacion
         ;
 /****************************************************************************/
 operadorLogico
-        : AND_          
-        | OR_           
+        : AND_          {&& = AND;}
+        | OR_           {&& = OR;}
         ;
 /****************************************************************************/
 operadorIgualdad
-        : IGU_   {$$ = IGU;}       
-        | DIF_   {$$ = DIF;}       
+        : IGU_          {$$ = IGU;}       
+        | DIF_          {$$ = DIF;}       
         ;
 /****************************************************************************/
 operadorRelacional
-        : MAYOR_        
-        | MENOR_        
-        | MAYORIG_      
-        | MENORIG_      
+        : MAYOR_        {&& = MAYOR;}
+        | MENOR_        {&& = MENOR;}
+        | MAYORIG_      {&& = MAYORIG;}
+        | MENORIG_      {&& = MENORIG;}
         ;
 /****************************************************************************/
 operadorAditivo
-        : MAS_          
-        | MENOS_        
+        : MAS_          {&& = MAS_UN;}
+        | MENOS_        {&& = MENOS_UN;}
         ;
 /****************************************************************************/
 operadorMultiplicativo
-        : POR_    {$$ = POR;}      
-        | DIV_    {$$ = DIV;}      
-        | MOD_    {$$ = MOD;}      
+        : POR_          {$$ = POR;}      
+        | DIV_          {$$ = DIV;}      
+        | MOD_          {$$ = MOD;}      
         ;
 /****************************************************************************/
 operdorUnario
-        : MAS_          
-        | MENOS_        
-        | NEG_          
+        : MAS_          {&& = MAS_UN;}
+        | MENOS_        {&& = MENOS_UN;}
+        | NEG_          {&& = NEG_UN;}      
         ;
 /****************************************************************************/
 operadorIncremento
-        : INCRE_        
-        | DECRE_        
+        : INCRE_        {&& = INCRE;}
+        | DECRE_        {&& = DECRE;}
         ;
 /****************************************************************************/
                 
