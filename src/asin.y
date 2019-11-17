@@ -198,14 +198,14 @@ expresion
 /****************************************************************************/
 expresionLogica
         : expresionIgualdad
-                                                {$$.tipo = $1.tipo; $$.pos = $1.pos;}
+                                                {$$.tipo = $1.tipo; $$.pos = $1.pos;} //creo que .pos  no hace falta
         | expresionLogica operadorLogico expresionIgualdad
                                 {
                                         $$.tipo = T_ERROR;
                                         if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
                                                 if ($1.tipo != $3.tipo){
                                                         yyerror("No coinciden los tipos del operador lógico");
-                                                } else if (!($1.tipo == T_LOGICO || $1.tipo == T_ENTERO) ){
+                                                } else if (!($1.tipo == T_LOGICO) ){
                                                         yyerror("Error de tipos en la igualdad");
                                                 } else {
                                                         $$.tipo = T_LOGICO;
@@ -216,7 +216,7 @@ expresionLogica
         ;
 /****************************************************************************/
 expresionIgualdad
-        : expresionRelacional                   {$$.tipo = $1.tipo; $$.pos = $1.pos;}
+        : expresionRelacional                   {$$.tipo = $1.tipo; $$.pos = $1.pos;} //creo que .pos no hace falta
         | expresionIgualdad operadorIgualdad expresionRelacional
                                 {
                                         $$.tipo = T_ERROR;
@@ -238,12 +238,20 @@ expresionRelacional
         ;
 /****************************************************************************/
 expresionAditiva
-        : expresionMultiplicativa
-        | expresionAditiva operadorAditivo expresionMultiplicativa
+        : expresionMultiplicativa {$$.tipo = $1.tipo;}
+        | expresionAditiva operadorAditivo expresionMultiplicativa 
+                { $$.tipo = T_ERROR;
+                 if($3.tipo != T_ERROR && $1.tipo != T_ERROR){
+                         if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)){
+                                 yyerror("Los tipos de una operacion aditiva deben ser enteros");
+                         }
+                         else {$$.tipo = $1.tipo;}
+                 }
+                }
         ;
 /****************************************************************************/
 expresionMultiplicativa
-        : expresionUnaria {$$.tipo = $1.tipo; $$.pos = $1.pos;}   
+        : expresionUnaria {$$.tipo = $1.tipo; $$.pos = $1.pos;}  //creo que .pos no hace falta 
         | expresionMultiplicativa operadorMultiplicativo expresionUnaria
                 { $$.tipo = T_ERROR;
                   if($3.tipo != T_ERROR && $1.tipo != T_ERROR){
@@ -256,18 +264,73 @@ expresionMultiplicativa
         ;
 /****************************************************************************/
 expresionUnaria
-        : expresionSufija       
-        | operdorUnario expresionUnaria
-        | operadorIncremento ID_
+        : expresionSufija      {$$.tipo = $1.tipo;} 
+        | operadorUnario expresionUnaria {$$.tipo = $2.tipo;}
+        | operadorIncremento ID_         {$$.tipo = T_ERROR;
+                                        SIMB simb = obtTdS($2);
+                                        if (simb.tipo == T_ERROR){yyerror("Objeto no declarado")}
+                                        else { if !(simb.tipo == T_RECORD || simb.tipo == T_ARRAY){ //DUDA!!!! 
+                                                 $$.tipo = simb.tipo;
+                                                }
+                                               }
+                                        }
         ;
 /****************************************************************************/
 expresionSufija
-        : PARA_ expresion PARC_
-        | ID_ operadorIncremento
-        | ID_ CORA_ expresion CORC_ 
-        | ID_                           
-        | ID_ PUNTO_ ID_                
-        | constante                     
+        : PARA_ expresion PARC_ {$$.tipo = $2.tipo;}
+        | ID_ operadorIncremento {      $$.tipo = T_ERROR;
+                                        SIMB simb = obtTdS($1);
+                                        if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
+                                        else{
+                                                $$.tipo = $1.tipo;
+                                        }
+                        
+
+        }
+        | ID_ CORA_ expresion CORC_ {   $$.tipo = T_ERROR;
+                                        SIMB simb = obtTdS($1);
+                                        if (simb.tipo == T_ERROR) {yyerror("Objeto no declarado);}
+                                        else {
+                                                if(simb.tipo == T_ARRAY){
+                                                        if($3.tipo == T_ENTERO){
+                                                                DIM arr = obtTdA(simb.ref);
+                                                                if (arr.telem == T_ERROR) {yyerror("objeto array invalido");}
+                                                                else {$$.tipo = arr.telem;}
+                                                        }
+
+                                                }else yyerror("objeto no de tipo array");
+                                        }
+                                 
+                                     
+
+                                }
+        | ID_       {
+                $$.tipo = T_ERROR;
+                SIMB sim = obtTdS($1);
+                if(sim.tipo == T_ERROR) {yyerror("Objeto no declarado");}
+                else {
+                        $$.tipo = sim.tipo;
+                }
+
+                }                    
+        | ID_ PUNTO_ ID_  { $$.tipo = T_ERROR;
+                            SIMB simb = obtTdS($1);
+                            if (simb.tipo == T_ERROR) {yyerror("Objeto no declarado");}
+                            else{
+                                if (simb.tipo == T_RECORD){
+                                        CAMP simb2 = obtTdR(simb.ref, $3);
+                                        if (simb2.tipo == T_ERROR){yyerror("Nombre de registro invalido);}
+                                        else{
+                                                $$.tipo = simb2.tipo;
+                                        }
+
+                                }
+                                else yyerror("objeto no de tipo registro");    
+                            }
+
+
+                        }              
+        | constante   {$$.tipo = $1.tipo;}          
         ;
 /****************************************************************************/
 constante
@@ -277,16 +340,16 @@ constante
         ;
 /****************************************************************************/
 operadorAsignacion
-        : ASIG_         
-        | MASASIG_      
-        | MENOSASIG_    
-        | PORASIG_      
-        | DIVASIG_      
+        : ASIG_         {$$ =ASIG;}
+        | MASASIG_      {$$ =MASASIG;}
+        | MENOSASIG_    {$$ =MENOSASIG;}
+        | PORASIG_      {$$ =PORASIG;}
+        | DIVASIG_      {$$ =DIVASIG;}
         ;
 /****************************************************************************/
 operadorLogico
-        : AND_          {&& = AND;}
-        | OR_           {&& = OR;}
+        : AND_          {$$ = AND;}
+        | OR_           {$$ = OR;}
         ;
 /****************************************************************************/
 operadorIgualdad
@@ -295,15 +358,15 @@ operadorIgualdad
         ;
 /****************************************************************************/
 operadorRelacional
-        : MAYOR_        {&& = MAYOR;}
-        | MENOR_        {&& = MENOR;}
-        | MAYORIG_      {&& = MAYORIG;}
-        | MENORIG_      {&& = MENORIG;}
+        : MAYOR_        {$$ = MAYOR;}
+        | MENOR_        {$$ = MENOR;}
+        | MAYORIG_      {$$ = MAYORIG;}
+        | MENORIG_      {$$ = MENORIG;}
         ;
 /****************************************************************************/
 operadorAditivo
-        : MAS_          {&& = MAS_UN;}
-        | MENOS_        {&& = MENOS_UN;}
+        : MAS_          {$$ = MAS_UN;}
+        | MENOS_        {$$ = MENOS_UN;}
         ;
 /****************************************************************************/
 operadorMultiplicativo
@@ -313,14 +376,14 @@ operadorMultiplicativo
         ;
 /****************************************************************************/
 operdorUnario
-        : MAS_          {&& = MAS_UN;}
-        | MENOS_        {&& = MENOS_UN;}
-        | NEG_          {&& = NEG_UN;}      
+        : MAS_          {$$ = MAS_UN;}
+        | MENOS_        {$$ = MENOS_UN;}
+        | NEG_          {$$ = NEG_UN;}      
         ;
 /****************************************************************************/
 operadorIncremento
-        : INCRE_        {&& = INCRE;}
-        | DECRE_        {&& = DECRE;}
+        : INCRE_        {$$ = INCRE;}
+        | DECRE_        {$$ = DECRE;}
         ;
 /****************************************************************************/
                 
