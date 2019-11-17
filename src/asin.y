@@ -37,7 +37,7 @@
 
 %type <cent> tipoSimple constante 
 
-%type <reg>  listaCampos
+%type <regi>  listaCampos
 %type <exp> expresion expresionLogica expresionRelacional expresionAditiva  
 %type <exp> expresionUnario expresionSufijaexpresionIgualdad expresionMultiplicativa
 
@@ -48,11 +48,12 @@
 
 /****************************************************************************/
 programa
-        : {dvar = 0;} LLAVA_ secuenciaSentencias LLAVC_         {
-                                                                        if(verTDS){
-                                                                                verTdS();
-                                                                        }
-                                                                }
+        : {dvar = 0;} LLAVA_ secuenciaSentencias LLAVC_         
+                                {
+                                        if(verTDS){
+                                                verTdS();
+                                        }
+                                }
         ;
 /****************************************************************************/
 secuenciaSentencias
@@ -166,10 +167,21 @@ instruccionEntradaSalida
 /****************************************************************************/
 instruccionSeleccion
         : IF_ PARA_ expresion PARC_ instruccion ELSE_ instruccion
+                                                {
+                                                        if($3.tipo != T_LOGICO){
+                                                                yyerror("Error, tipo no lógico como condición en IF ELSE");
+                                                        }
+                                                }
         ;
 /****************************************************************************/
 instruccionIteracion
-        :  WHILE_ PARA_ expresion PARC_ instruccion
+        :  WHILE_ PARA_ expresion PARC_ instruccion     
+                                                {
+                                                        if($3.tipo != T_LOGICO){
+                                                                yyerror("Error, tipo no lógico como condición en IF ELSE");
+                                                        }
+                                                }
+        ;
         ;
 /****************************************************************************/
 instruccionExpresion
@@ -186,6 +198,7 @@ expresion
 /****************************************************************************/
 expresionLogica
         : expresionIgualdad
+                                                {$$.tipo = $1.tipo; $$.pos = $1.pos;}
         | expresionLogica operadorLogico expresionIgualdad
         ;
 /****************************************************************************/
