@@ -200,22 +200,36 @@ expresionLogica
         : expresionIgualdad
                                                 {$$.tipo = $1.tipo; $$.pos = $1.pos;}
         | expresionLogica operadorLogico expresionIgualdad
+                                {
+                                        $$.tipo = T_ERROR;
+                                        if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
+                                                if ($1.tipo != $3.tipo){
+                                                        yyerror("No coinciden los tipos del operador lógico");
+                                                } else if (!($1.tipo == T_LOGICO || $1.tipo == T_ENTERO) ){
+                                                        yyerror("Error de tipos en la igualdad");
+                                                } else {
+                                                        $$.tipo = T_LOGICO;
+                                                }
+                                        }
+                                }
+
         ;
 /****************************************************************************/
 expresionIgualdad
-        : expresionRelacional {$$.tipo = $1.tipo; $$.pos = $1.pos;}
+        : expresionRelacional                   {$$.tipo = $1.tipo; $$.pos = $1.pos;}
         | expresionIgualdad operadorIgualdad expresionRelacional
-                {$$.tipo = T_ERROR;
-                if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
-                        if ($1.tipo != $3.tipo){
-                                yyerror("No coinciden los tipos de la igualdad");
-                        } else if (!($1.tipo == T_LOGICO || $1.tipo == T_ENTERO) ){
-                                yyerror("Error de tipos en la igualdad");
-                               } else {
-                                        $$.tipo = T_LOGICO;
+                                {
+                                        $$.tipo = T_ERROR;
+                                        if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
+                                                if ($1.tipo != $3.tipo){
+                                                        yyerror("No coinciden los tipos de la igualdad");
+                                                } else if (!($1.tipo == T_LOGICO || $1.tipo == T_ENTERO) ){
+                                                        yyerror("Error de tipos en la igualdad");
+                                                } else {
+                                                        $$.tipo = T_LOGICO;
+                                                }
                                         }
-                                 }
-           }
+                                }
         ;
 /****************************************************************************/
 expresionRelacional
