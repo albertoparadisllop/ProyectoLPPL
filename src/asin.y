@@ -166,21 +166,21 @@ instruccionEntradaSalida
         ; 
 /****************************************************************************/
 instruccionSeleccion
-        : IF_ PARA_ expresion PARC_ instruccion ELSE_ instruccion
-                                                {
+        : IF_ PARA_ expresion PARC_ {
                                                         if($3.tipo != T_LOGICO && $3.tipo != T_ERROR){
                                                                 yyerror("Error, tipo no lógico como condición en IF ELSE");
                                                         }
-                                                }
+                                                } instruccion ELSE_ instruccion
+                                                
         ;
 /****************************************************************************/
 instruccionIteracion
-        :  WHILE_ PARA_ expresion PARC_ instruccion     
-                                                {
+        :  WHILE_ PARA_ expresion PARC_ {
                                                         if($3.tipo != T_LOGICO && $3.tipo != T_ERROR){
-                                                                yyerror("Error, tipo no lógico como condición en IF ELSE");
+                                                                yyerror("Error, tipo no lógico como condición en WHILE");
                                                         }
-                                                }
+                                                } instruccion     
+                                                
         ;
         ;
 /****************************************************************************/
