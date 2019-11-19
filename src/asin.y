@@ -190,11 +190,47 @@ instruccionExpresion
         ;
 /****************************************************************************/
 expresion
-        : expresionLogica
-        | ID_ operadorAsignacion expresion
+        : expresionLogica		{$$.tipo = $1.tipo; $$.pos = $1.pos;}
+        | ID_ operadorAsignacion expresion 		
+        						{
+        							$$.tipo = T_ERROR;
+        							SIMB simb = obtTdS($2);
+        							if(simb.tipo == T_ERROR){
+        								yyerror("Variable no declarada");
+        							} else if(simb.tipo != expresion.tipo) {
+        								yyerror("Tipo inconsistente en expresión de asignación");
+        							} else if( $2 == ASIG){
+        								//Asignar
+        							} else if(false){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+        								//switch para cada tipo de operadorAsignacion excepto ASIG
+        								switch(operadorAsignacion){
+        									case MASASIG:
+        										//Asignar sumando
+        										break;
+        									case MENOSASIG:
+        										//Asignar restando
+        										break;
+        									case PORASIG:
+        										//Asignar multiplicando
+        										break;
+        									case DIVASIG:
+        										//Asignar dividiendo
+        										break;
+        								}
+        							} else {
+        								yyerror("Variable no inicializada");
+        							}
+        						}
         | ID_ CORA_ expresion CORC_ operadorAsignacion expresion
         | ID_ PUNTO_ ID_ operadorAsignacion expresion
         ;
+
+        : ASIG_         {$$ =ASIG;}
+        | MASASIG_      {$$ =MASASIG;}
+        | MENOSASIG_    {$$ =MENOSASIG;}
+        | PORASIG_      {$$ =PORASIG;}
+        | DIVASIG_      {$$ =DIVASIG;}
+
 /****************************************************************************/
 expresionLogica
         : expresionIgualdad
@@ -205,7 +241,7 @@ expresionLogica
                                         if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
                                                 if ($1.tipo != $3.tipo){
                                                         yyerror("No coinciden los tipos del operador lógico");
-                                                } else if (!($1.tipo == T_LOGICO) ){
+                                                } else if (!($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) ){
                                                         yyerror("Error de tipos en la igualdad");
                                                 } else {
                                                         $$.tipo = T_LOGICO;
@@ -223,7 +259,7 @@ expresionIgualdad
                                         if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
                                                 if ($1.tipo != $3.tipo){
                                                         yyerror("No coinciden los tipos de la igualdad");
-                                                } else if (!($1.tipo == T_LOGICO || $1.tipo == T_ENTERO) ){
+                                                } else if (!($1.tipo == $3.tipo && ($1.tipo == T_LOGICO || $1.tipo ==T_ENTERO) ){
                                                         yyerror("Error de tipos en la igualdad");
                                                 } else {
                                                         $$.tipo = T_LOGICO;
@@ -233,12 +269,20 @@ expresionIgualdad
         ;
 /****************************************************************************/
 expresionRelacional
-        : expresionAditiva
+        : expresionAditiva			{$$.tipo = $1.tipo;}
         | expresionRelacional operadorRelacional expresionAditiva
+        		{ $$.tipo = T_ERROR;
+                 if($3.tipo != T_ERROR && $1.tipo != T_ERROR){
+                         if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)){
+                                 yyerror("Los tipos de una operacion relacional deben ser enteros");
+                         }
+                         else {$$.tipo = T_LOGICO;}
+                 }
+                }
         ;
 /****************************************************************************/
 expresionAditiva
-        : expresionMultiplicativa {$$.tipo = $1.tipo;}
+        : expresionMultiplicativa 	{$$.tipo = $1.tipo;}
         | expresionAditiva operadorAditivo expresionMultiplicativa 
                 { $$.tipo = T_ERROR;
                  if($3.tipo != T_ERROR && $1.tipo != T_ERROR){
