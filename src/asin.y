@@ -35,11 +35,11 @@
 %token <ident> ID_
 /****************************************************************************/
 
-%type <cent> tipoSimple constante 
+%type <cent> tipoSimple operadorUnario operadorMultiplicativo operadorAsignacion operadorIncremento operadorAditivo operadorRelacional operadorIgualdad  operadorLogico
 
 %type <regi>  listaCampos
-%type <exp> expresion expresionLogica expresionRelacional expresionAditiva  
-%type <exp> expresionUnario expresionSufijaexpresionIgualdad expresionMultiplicativa
+%type <exp> expresion expresionLogica expresionRelacional expresionAditiva constante
+%type <exp> expresionUnaria expresionSufija expresionIgualdad expresionMultiplicativa
 
 %%
 /****************************************************************************/
@@ -78,7 +78,7 @@ declaracion
                                 }
         | tipoSimple ID_ ASIG_ constante PCOMA_
                                 {
-                                        if($1 != $4){
+                                        if($1 != $4.tipo){
                                                 //Tipo declarado != tipo constante
                                                 yyerror(ERROR_TIPOS_DECLARACION);
                                         } else if(insTdS($2, $1, dvar, -1) == 0){
@@ -161,7 +161,7 @@ instruccionEntradaSalida
                                               }
                                         } 
         | PRINT_ PARA_ expresion PARC_ PCOMA_  { if ($3.tipo != T_ENTERO){
-                                                yyerror("El argumento del print debe ser entero")}
+                                                yyerror("El argumento del print debe ser entero");}
                                               }
         ; 
 /****************************************************************************/
@@ -201,7 +201,7 @@ expresion
         								yyerror("Tipo inconsistente en expresión de asignación");
         							} else if( $2 == ASIG){
         								//Asignar
-        							} else if(false){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+        							} else if(0){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
         								//switch para cada tipo de operadorAsignacion excepto ASIG
         								switch($2){
         									case MASASIG:
@@ -239,7 +239,7 @@ expresion
 				    								yyerror("Tipo inconsistente en expresión de asignación");
 				    							} else if( $5 == ASIG){
 				    								//Asignar
-				    							} else if(false){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+				    							} else if(0){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 				    								//switch para cada tipo de operadorAsignacion excepto ASIG
 				    								switch($5){
 				    									case MASASIG:
@@ -277,11 +277,11 @@ expresion
 	        										yyerror("Error, campo no existente");
 				    							} else if(camp.tipo != $5.tipo){
 				    								yyerror("Inconsistencia de tipos en asignacion en campo");
-				    							} else if( $5 == ASIG){
+				    							} else if( $4 == ASIG){
 				    								//Asignar
-				    							} else if(false){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+				    							} else if(0){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 				    								//switch para cada tipo de operadorAsignacion excepto ASIG
-				    								switch($5){
+				    								switch($4){
 				    									case MASASIG:
 				    										//Asignar sumando
 				    										break;
@@ -299,7 +299,7 @@ expresion
 				    								yyerror("Variable no inicializada");
 				    							}
 				    						} else {
-				    							yyerror("Acceso como estructura de una variable no estructura.")
+				    							yyerror("Acceso como estructura de una variable no estructura.");
 				    						}
         								}
         						}
@@ -333,7 +333,7 @@ expresionIgualdad
                                         if ($1.tipo != T_ERROR && $3.tipo != T_ERROR){
                                                 if ($1.tipo != $3.tipo){
                                                         yyerror("No coinciden los tipos de la igualdad");
-                                                } else if (!($1.tipo == $3.tipo && ($1.tipo == T_LOGICO || $1.tipo ==T_ENTERO) ){
+                                                } else if (!($1.tipo == $3.tipo && ($1.tipo == T_LOGICO || $1.tipo ==T_ENTERO)) ){
                                                         yyerror("Error de tipos en la igualdad");
                                                 } else {
                                                         $$.tipo = T_LOGICO;
@@ -379,6 +379,7 @@ expresionMultiplicativa
                                     $$.tipo = $1.tipo;
                                 }
                             }
+                }
         ;
 /****************************************************************************/
 expresionUnaria
@@ -386,11 +387,11 @@ expresionUnaria
         | operadorUnario expresionUnaria {$$.tipo = $2.tipo;}
         | operadorIncremento ID_         {$$.tipo = T_ERROR;
                                         SIMB simb = obtTdS($2);
-                                        if (simb.tipo == T_ERROR){yyerror("Objeto no declarado")}
-                                        else { if !(simb.tipo == T_RECORD || simb.tipo == T_ARRAY){ //DUDA!!!! 
+                                        if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
+                                        else if (!(simb.tipo == T_RECORD || simb.tipo == T_ARRAY)){ 
+                                        		//DUDA!!!! 
                                                  $$.tipo = simb.tipo;
                                                 }
-                                               }
                                         }
         ;
 /****************************************************************************/
@@ -400,14 +401,14 @@ expresionSufija
                                         SIMB simb = obtTdS($1);
                                         if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
                                         else{
-                                                $$.tipo = $1.tipo;
+                                                $$.tipo = simb.tipo;
                                         }
                         
 
         }
         | ID_ CORA_ expresion CORC_ {   $$.tipo = T_ERROR;
                                         SIMB simb = obtTdS($1);
-                                        if (simb.tipo == T_ERROR) {yyerror("Objeto no declarado);}
+                                        if (simb.tipo == T_ERROR) {yyerror("Objeto no declarado");}
                                         else {
                                                 if(simb.tipo == T_ARRAY){
                                                         if($3.tipo == T_ENTERO){
@@ -437,7 +438,7 @@ expresionSufija
                             else{
                                 if (simb.tipo == T_RECORD){
                                         CAMP simb2 = obtTdR(simb.ref, $3);
-                                        if (simb2.tipo == T_ERROR){yyerror("Nombre de registro invalido);}
+                                        if (simb2.tipo == T_ERROR){yyerror("Nombre de registro invalido");}
                                         else{
                                                 $$.tipo = simb2.tipo;
                                         }
@@ -493,7 +494,7 @@ operadorMultiplicativo
         | MOD_          {$$ = MOD;}      
         ;
 /****************************************************************************/
-operdorUnario
+operadorUnario
         : MAS_          {$$ = MAS_UN;}
         | MENOS_        {$$ = MENOS_UN;}
         | NEG_          {$$ = NEG_UN;}      

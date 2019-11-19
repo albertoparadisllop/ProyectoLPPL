@@ -21,9 +21,9 @@
 /****************************************** Operador Asignacion */
 #define ASIG 0
 #define MASASIG 1
-#define MENOSASIG 1
-#define PORASIG 1
-#define DIVASIG 1
+#define MENOSASIG 2
+#define PORASIG 3
+#define DIVASIG 4
 
 /****************************************** Operador Logico */
 #define AND 0
