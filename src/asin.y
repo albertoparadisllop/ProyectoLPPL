@@ -225,12 +225,6 @@ expresion
         | ID_ PUNTO_ ID_ operadorAsignacion expresion
         ;
 
-        : ASIG_         {$$ =ASIG;}
-        | MASASIG_      {$$ =MASASIG;}
-        | MENOSASIG_    {$$ =MENOSASIG;}
-        | PORASIG_      {$$ =PORASIG;}
-        | DIVASIG_      {$$ =DIVASIG;}
-
 /****************************************************************************/
 expresionLogica
         : expresionIgualdad
