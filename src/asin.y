@@ -202,6 +202,8 @@ expresion
 	        								yyerror("Tipo inconsistente en expresión de asignación");
 	        							} else if( $2 == ASIG){
 	        								//Asignar
+	        							} else if($3.tipo != T_ENTERO){
+	        								yyerror("Tipo no valido para asignacion con operación aritmética");
 	        							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 	        								//switch para cada tipo de operadorAsignacion excepto ASIG
 	        								switch($2){
@@ -230,41 +232,40 @@ expresion
 	        							SIMB simb = obtTdS($1);
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror("Estructura no declarada");
-	        							} else 
-	        								{
-	        									if(simb.tipo == T_ARRAY){
-		        									DIM dim = obtTdA(simb.ref);
-		        									if(dim.telem == T_ERROR){
-		        										yyerror("Error de array");
-					    							} else if($3.tipo != T_ENTERO){
-					    								yyerror("Se debe acceder al vector con un entero");
-					    							} else if(dim.telem != $6.tipo) {
-					    								yyerror("Tipo inconsistente en expresión de asignación");
-					    							} else if( $5 == ASIG){
-					    								//Asignar
-					    							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-					    								//switch para cada tipo de operadorAsignacion excepto ASIG
-					    								switch($5){
-					    									case MASASIG:
-					    										//Asignar sumando
-					    										break;
-					    									case MENOSASIG:
-					    										//Asignar restando
-					    										break;
-					    									case PORASIG:
-					    										//Asignar multiplicando
-					    										break;
-					    									case DIVASIG:
-					    										//Asignar dividiendo
-					    										break;
-					    								}
-					    							} else {
-					    								yyerror("Variable no inicializada");
-					    							}
-					    						} else {
-					    							yyerror("Acceso vector sobre una variable no vector");
-					    						}
-	        								}
+	        							} else {
+        									if(simb.tipo == T_ARRAY){
+	        									DIM dim = obtTdA(simb.ref);
+	        									if(dim.telem == T_ERROR){
+	        										yyerror("Error de array");
+				    							} else if($3.tipo != T_ENTERO){
+				    								yyerror("Se debe acceder al vector con un entero");
+				    							} else if(dim.telem != $6.tipo) {
+				    								yyerror("Tipo inconsistente en expresión de asignación");
+				    							} else if( $5 == ASIG){
+				    								//Asignar
+				    							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+				    								//switch para cada tipo de operadorAsignacion excepto ASIG
+				    								switch($5){
+				    									case MASASIG:
+				    										//Asignar sumando
+				    										break;
+				    									case MENOSASIG:
+				    										//Asignar restando
+				    										break;
+				    									case PORASIG:
+				    										//Asignar multiplicando
+				    										break;
+				    									case DIVASIG:
+				    										//Asignar dividiendo
+				    										break;
+				    								}
+				    							} else {
+				    								yyerror("Variable no inicializada");
+				    							}
+				    						} else {
+				    							yyerror("Acceso vector sobre una variable no vector");
+				    						}
+        								}
 	        						}	
         						}
         | ID_ PUNTO_ ID_ operadorAsignacion expresion
@@ -274,39 +275,40 @@ expresion
 	        							SIMB simb = obtTdS($1);
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror("Registro no declarado");
-	        							} else 
-	        								{
-	        									if(simb.tipo == T_RECORD){
-		        									CAMP camp = obtTdR(simb.ref,$3);
-		        									if(camp.tipo == T_ERROR){
-		        										yyerror("Error, campo no existente");
-					    							} else if(camp.tipo != $5.tipo){
-					    								yyerror("Inconsistencia de tipos en asignacion en campo");
-					    							} else if( $4 == ASIG){
-					    								//Asignar
-					    							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-					    								//switch para cada tipo de operadorAsignacion excepto ASIG
-					    								switch($4){
-					    									case MASASIG:
-					    										//Asignar sumando
-					    										break;
-					    									case MENOSASIG:
-					    										//Asignar restando
-					    										break;
-					    									case PORASIG:
-					    										//Asignar multiplicando
-					    										break;
-					    									case DIVASIG:
-					    										//Asignar dividiendo
-					    										break;
-					    								}
-					    							} else {
-					    								yyerror("Variable no inicializada");
-					    							}
-					    						} else {
-					    							yyerror("Acceso como estructura de una variable no estructura.");
-					    						}
-	        								}
+	        							} else {
+        									if(simb.tipo == T_RECORD){
+	        									CAMP camp = obtTdR(simb.ref,$3);
+	        									if(camp.tipo == T_ERROR){
+	        										yyerror("Error, campo no existente");
+				    							} else if(camp.tipo != $5.tipo){
+				    								yyerror("Inconsistencia de tipos en asignacion en campo");
+				    							} else if( $4 == ASIG){
+				    								//Asignar
+				    							} else if($5.tipo != T_ENTERO){
+			        								yyerror("Tipo no valido para asignacion con operación aritmética");
+			        							} elseif(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+				    								//switch para cada tipo de operadorAsignacion excepto ASIG
+				    								switch($4){
+				    									case MASASIG:
+				    										//Asignar sumando
+				    										break;
+				    									case MENOSASIG:
+				    										//Asignar restando
+				    										break;
+				    									case PORASIG:
+				    										//Asignar multiplicando
+				    										break;
+				    									case DIVASIG:
+				    										//Asignar dividiendo
+				    										break;
+				    								}
+				    							} else {
+				    								yyerror("Variable no inicializada");
+				    							}
+				    						} else {
+				    							yyerror("Acceso como estructura de una variable no estructura.");
+				    						}
+        								}
 	        						}
         						}
         ;
