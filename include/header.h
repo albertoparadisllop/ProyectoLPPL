@@ -8,9 +8,11 @@
 
 /***************************ERRORES*******************************************/
 #define ERROR_ID_YA_DECLARADO           "Identificador ya declarado"
-#define ERROR_CAMPO_YA_DECLARADO        "Campo repetido en estructura"
+#define ERROR_CAMPO_YA_DECLARADO        "Campo ya declarado en la estructura"
 #define ERROR_TALLA_ARRAY               "Talla del array incorrecta"
 #define ERROR_TIPOS_DECLARACION         "Tipo inconsistente en declaración"
+#define ERROR_VAR_NO_DECLARADA          "Identificador no declarado"
+#define ERROR_VAR_NO_INI                "Variable no inicializada a un valor"
 
 /****************************************************** Constantes generales */
 #define TRUE  1
