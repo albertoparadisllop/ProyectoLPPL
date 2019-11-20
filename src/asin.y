@@ -286,7 +286,7 @@ expresion
 				    								//Asignar
 				    							} else if($5.tipo != T_ENTERO){
 			        								yyerror("Tipo no valido para asignacion con operación aritmética");
-			        							} elseif(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+			        							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 				    								//switch para cada tipo de operadorAsignacion excepto ASIG
 				    								switch($4){
 				    									case MASASIG:
