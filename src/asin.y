@@ -392,7 +392,18 @@ expresionMultiplicativa
 /****************************************************************************/
 expresionUnaria
         : expresionSufija      {$$ = $1;} 
-        | operadorUnario expresionUnaria {$$.tipo = $2.tipo;}
+        | operadorUnario expresionUnaria 	{ 
+        										$$.tipo = T_ERROR;
+							                  	if($2.tipo != T_ERROR){
+							                        if ($1 == NEG_UN && $2.tipo != T_LOGICO){
+					                                    yyerror("Operador negación debe ser aplicado a tipo lógico");
+					                                } else if (($1 == MAS_UN || $1 == MENOS_UN)  && $2.tipo != T_ENTERO){
+					                                    yyerror("Operador negación debe ser aplicado a tipo lógico");
+					                                } else {
+					                                    $$.tipo = $2.tipo;
+					                                }
+							                 	}
+							                }
         | operadorIncremento ID_         {$$.tipo = T_ERROR;
                                         SIMB simb = obtTdS($2);
                                         if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
@@ -408,7 +419,8 @@ expresionSufija
         : PARA_ expresion PARC_ {$$ = $2;}
         | ID_ operadorIncremento {      $$.tipo = T_ERROR;
                                         SIMB simb = obtTdS($1);
-                                        if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
+                                        if (simb.tipo != T_ENTERO){yyerror("Identificador debe ser entero");}
+                                        else if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
                                         else{
                                                 $$.tipo = simb.tipo;
                                         }
