@@ -1,0 +1,40 @@
+  1.- // Ejemplo con opeadores logicos: 6 errores
+{
+  int a[20];
+  bool b;
+  int  c = 0;
+  bool a;
+Error en 6: Identificador ya declarado
+                         // Identificador repetido
+
+  b = ((a[2] > 0) && true) || c;
+Error en 8: No coinciden los tipos del operador lógico
+  // Error en "expresion logica"
+  b = a[7] == b;
+Error en 9: No coinciden los tipos de la igualdad
+                  // Error en "expresion de igualdad"
+  b = ! (a[2] * 10);
+Error en 10: Tipo inconsistente en expresión de asignación
+              // Error en "expresion unaria"
+  c = b++;
+Error en 11: Tipo inconsistente en expresión de asignación
+                        // El identificador debe ser entero
+  if (a[7] < b )
+Error en 12: Los tipos de una operacion relacional deben ser enteros
+                  // Error en "expresion de relacional"
+    a[7] = c;
+  else {}
+}
+================================================
+Variables globales en la TDS  
+================================================
+    Nombre         Tipo          DespRelativo   
+    --------------------------------------------
+    a              T_ARRAY         0
+        ----------------------------------------
+        TipoElem = T_ENTERO    NumElem = 20
+        ----------------------------------------
+    b              T_LOGICO       20
+    c              T_ENTERO       21
+================================================
+

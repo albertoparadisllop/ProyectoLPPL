@@ -1,0 +1,18 @@
+  1.- // Ejemplo con errores lexicos: 1 error
+{
+  int  aAa123_2016 = 0;
+  int c
+Error en 4: Caracter desconocido #
+;                         // caracter desconocido
+
+  c = (((aAa123_2016 % 2) - 3.56) * .34) / 2.;
+}
+================================================
+Variables globales en la TDS  
+================================================
+    Nombre         Tipo          DespRelativo   
+    --------------------------------------------
+    aAa123_2016    T_ENTERO        0
+    c              T_ENTERO        1
+================================================
+

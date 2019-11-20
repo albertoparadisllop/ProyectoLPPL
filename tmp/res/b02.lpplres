@@ -1,0 +1,43 @@
+  1.- // Ejemplo sobre registros: 5 errores
+{
+  struct { int  a1; bool a2; int  a3; } a;
+  int  b;   bool c;
+  struct {
+    int  d1;
+    bool d2;
+    int  d1;
+Error en 8: Campo repetido en estructura
+                 // Campo repetido
+  } c;
+Error en 9: Identificador ya declarado
+                       // Identificador repetido
+  int e;
+
+  b = c.c1 +
+Error en 12: objeto no de tipo registro
+ 27;             // El identificador debe ser "struct"
+  a.a2 = b * 2;
+Error en 13: Inconsistencia de tipos en asignacion en campo
+              // Error de tipos en la "asignacion"
+  c = a.a4 &&
+Error en 14: Nombre de registro invalido
+ true;          // Campo no declarado 
+}
+================================================
+Variables globales en la TDS  
+================================================
+    Nombre         Tipo          DespRelativo   
+    --------------------------------------------
+    a              T_RECORD        0
+        ----------------------------------------
+        Nombre         Tipo      Desp.
+        ----------------------------------------
+        a1             T_ENTERO  0
+        a2             T_LOGICO  1
+        a3             T_ENTERO  2
+        ----------------------------------------
+    b              T_ENTERO        3
+    c              T_LOGICO        4
+    e              T_ENTERO        5
+================================================
+
