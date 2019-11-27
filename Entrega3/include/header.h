@@ -14,51 +14,51 @@
 #define ERROR_VAR_NO_DECLARADA          "Identificador no declarado"
 #define ERROR_VAR_NO_INI                "Variable no inicializada a un valor"
 
+
 /****************************************************** Constantes generales */
 #define TRUE  1
 #define FALSE 0
 /****************************************** Tallas asociadas a tipos simples */
 #define TALLA_TIPO_SIMPLE 1
 
-/****************************************** Operador Asignacion */
-#define ASIG 0
-#define MASASIG 1
-#define MENOSASIG 2
-#define PORASIG 3
-#define DIVASIG 4
+// /****************************************** Operador Asignacion */
+// #define ASIG 0
+// #define MASASIG 1
+// #define MENOSASIG 2
+// #define PORASIG 3
+// #define DIVASIG 4
 
-/****************************************** Operador Logico */
-#define AND 0
-#define OR 1
+// /****************************************** Operador Logico */
+// #define AND 0
+// #define OR 1
 
-/****************************************** Operador Igualdad */
-#define IGU 0
-#define DIF 1
+// /****************************************** Operador Igualdad */
+// #define IGU 0
+// #define DIF 1
 
-/****************************************** Operador Relacional */
-#define MAYOR 0
-#define MENOR 1
-#define MAYORIG 2
-#define MENORIG 3
+// /****************************************** Operador Relacional */
+// #define MAYOR 0
+// #define MENOR 1
+// #define MAYORIG 2
+// #define MENORIG 3
 
-/****************************************** Operador Unario */
-#define MAS 0
-#define MENOS 1
+// /****************************************** Operador Unario */
+// #define MAS 0
+// #define MENOS 1
 
-/****************************************** Operador Multiplicativo */
-#define POR 0
-#define DIV 1
-#define MOD 2
+// /****************************************** Operador Multiplicativo */
+// #define POR 0
+// #define DIV 1
+// #define MOD 2
 
-/****************************************** Operador Unario */
-#define MAS_UN 0
-#define MENOS_UN 1
-#define NEG_UN 2
+// /****************************************** Operador Unario */
+// #define MAS_UN 0
+// #define MENOS_UN 1
+// #define NEG_UN 2
 
-/****************************************** Operador Incremento */
-#define INCRE 0
-#define DECRE 1
-
+// /****************************************** Operador Incremento */
+// #define INCRE 0
+// #define DECRE 1
 
 
 /************************************* Variables externas definidas en el AL */
@@ -66,10 +66,13 @@ extern int yylex();
 extern int yyparse();
 
 
-//
+//Mostrar TDS al terminar
 extern int verTDS;
-//
+
+//Desplazamiento variables
 extern int dvar;
+//Desplazamiento instrucciones
+extern int si;
 
 extern FILE *yyin;                           /* Fichero de entrada           */
 extern int   yylineno;                       /* Contador del numero de linea */

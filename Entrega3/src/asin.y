@@ -6,6 +6,7 @@
 #include <string.h>
 #include "header.h"
 #include "libtds.h"
+#include "libgci.h"
 %}
 
 %union {
@@ -48,7 +49,7 @@
 
 /****************************************************************************/
 programa
-        : {dvar = 0;} LLAVA_ secuenciaSentencias LLAVC_         
+        : {dvar = 0; si = 0;} LLAVA_ secuenciaSentencias LLAVC_         
                                 {
                                         if(verTDS){
                                                 verTdS();
@@ -85,7 +86,7 @@ declaracion
                                                 //Ya se ha declarado
                                                 yyerror(ERROR_ID_YA_DECLARADO);
                                         } else {
-                                                //Falta asignar
+                                                //FALTA ASIGNAR
                                                 dvar += TALLA_TIPO_SIMPLE;
                                         }
                                 }
@@ -206,20 +207,7 @@ expresion
 	        								yyerror("Tipo no valido para asignacion con operación aritmética");
 	        							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 	        								//switch para cada tipo de operadorAsignacion excepto ASIG
-	        								switch($2){
-	        									case MASASIG:
-	        										//Asignar sumando
-	        										break;
-	        									case MENOSASIG:
-	        										//Asignar restando
-	        										break;
-	        									case PORASIG:
-	        										//Asignar multiplicando
-	        										break;
-	        									case DIVASIG:
-	        										//Asignar dividiendo
-	        										break;
-	        								}
+	        								
 	        							} else {
 	        								yyerror(ERROR_VAR_NO_INI);
 	        							}
@@ -245,20 +233,7 @@ expresion
 				    								//Asignar
 				    							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 				    								//switch para cada tipo de operadorAsignacion excepto ASIG
-				    								switch($5){
-				    									case MASASIG:
-				    										//Asignar sumando
-				    										break;
-				    									case MENOSASIG:
-				    										//Asignar restando
-				    										break;
-				    									case PORASIG:
-				    										//Asignar multiplicando
-				    										break;
-				    									case DIVASIG:
-				    										//Asignar dividiendo
-				    										break;
-				    								}
+				    								
 				    							} else {
 				    								yyerror(ERROR_VAR_NO_INI);
 				    							}
@@ -288,19 +263,7 @@ expresion
 			        								yyerror("Tipo no valido para asignacion con operación aritmética");
 			        							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
 				    								//switch para cada tipo de operadorAsignacion excepto ASIG
-				    								switch($4){
-				    									case MASASIG:
-				    										//Asignar sumando
-				    										break;
-				    									case MENOSASIG:
-				    										//Asignar restando
-				    										break;
-				    									case PORASIG:
-				    										//Asignar multiplicando
-				    										break;
-				    									case DIVASIG:
-				    										//Asignar dividiendo
-				    										break;
+				    								
 				    								}
 				    							} else {
 				    								yyerror(ERROR_VAR_NO_INI);
@@ -329,6 +292,16 @@ expresionLogica
                                                         $$.tipo = T_LOGICO;
                                                 }
                                         }
+
+                                    $$.pos = creaVarTemp();
+                                    if($2 == AND){
+                                    	emite(EMULT,crArgPos($1.pos),crArgPos($3.pos),crArgPos($$.pos));
+                                    } else {
+                                    	emite(ESUM,crArgPos($1.pos),crArgPos($3.pos),crArgPos($$.pos));
+                                    	emite(EMENEQ,crArgPos($$.pos),crArgEnt(1),crArgEtq(si+2));
+                                    	emite(EASIG,crArgEnt(1),crArgNul(),crArgPos($$.pos));
+                                    }
+
                                 }
 
         ;
@@ -347,6 +320,13 @@ expresionIgualdad
                                                         $$.tipo = T_LOGICO;
                                                 }
                                         }
+
+                                    $$.pos = creaVarTemp();
+
+                                    emite(EASIG,crArgEnt(1),crArgNul(),crArgPos($$.pos));
+					                emite($2,crArgPos($1.pos),crArgPos($3.pos),crArgEtq(si+2));
+					                emite(EASIG,crArgEnt(0),crArgNul(),crArgPos($$.pos));
+
                                 }
         ;
 /****************************************************************************/
@@ -360,20 +340,29 @@ expresionRelacional
                          }
                          else {$$.tipo = T_LOGICO;}
                  }
-                }
+            	$$.pos = creaVarTemp();
+
+            	emite(EASIG,crArgEnt(1),crArgNul(),crArgPos($$.pos));
+                emite($2,crArgPos($1.pos),crArgPos($3.pos),crArgEtq(si+2));
+                emite(EASIG,crArgEnt(0),crArgNul(),crArgPos($$.pos));
+            }
         ;
 /****************************************************************************/
 expresionAditiva
         : expresionMultiplicativa 	{$$ = $1;}
         | expresionAditiva operadorAditivo expresionMultiplicativa 
-                { $$.tipo = T_ERROR;
-                 if($3.tipo != T_ERROR && $1.tipo != T_ERROR){
+            { 
+                $$.tipo = T_ERROR;
+                if($3.tipo != T_ERROR && $1.tipo != T_ERROR){
                          if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)){
-                                 yyerror("Los tipos de una operacion aditiva deben ser enteros");
+                            yyerror("Los tipos de una operacion aditiva deben ser enteros");
+                         } else {
+                         	$$.tipo = $1.tipo;
                          }
-                         else {$$.tipo = $1.tipo;}
-                 }
                 }
+                $$.pos = creaVarTemp();
+                emite($2,crArgPos($1.pos),crArgPos($3.pos),crArgPos($$.pos));
+            }
         ;
 /****************************************************************************/
 expresionMultiplicativa
@@ -387,6 +376,8 @@ expresionMultiplicativa
                                     $$.tipo = $1.tipo;
                                 }
                             }
+                	$$.pos = creaVarTemp();
+                	emite($2,crArgPos($1.pos),crArgPos($3.pos),crArgPos($$.pos));
                 }
         ;
 /****************************************************************************/
@@ -474,17 +465,29 @@ expresionSufija
         ;
 /****************************************************************************/
 constante
-        : CTE_         {$$.tipo = T_ENTERO;}
-        | TRUE_        {$$.tipo = T_LOGICO;}
-        | FALSE_       {$$.tipo = T_LOGICO;} 
+        : CTE_         	{
+        					$$.tipo = T_ENTERO;
+        					$$.pos = creaVarTemp();
+        					emite(ASIG,crVarEnt($1),crVarNul(),crVarPos($$.pos));
+        				}
+        | TRUE_        	{
+        					$$.tipo = T_LOGICO;
+        					$$.pos = creaVarTemp();
+        					emite(ASIG,crVarEnt(1),crVarNul(),crVarPos($$.pos));
+        				}
+        | FALSE_       	{
+        					$$.tipo = T_LOGICO;
+        					$$.pos = creaVarTemp();
+        					emite(ASIG,crVarEnt(0),crVarNul(),crVarPos($$.pos));
+        				} 
         ;
 /****************************************************************************/
 operadorAsignacion
-        : ASIG_         {$$ =ASIG;}
-        | MASASIG_      {$$ =MASASIG;}
-        | MENOSASIG_    {$$ =MENOSASIG;}
-        | PORASIG_      {$$ =PORASIG;}
-        | DIVASIG_      {$$ =DIVASIG;}
+        : ASIG_         {$$ = EASIG;}
+        | MASASIG_      {$$ = ESUM;}
+        | MENOSASIG_    {$$ = EDIF;}
+        | PORASIG_      {$$ = EMULT;}
+        | DIVASIG_      {$$ = EDIVI;}
         ;
 /****************************************************************************/
 operadorLogico
@@ -493,36 +496,36 @@ operadorLogico
         ;
 /****************************************************************************/
 operadorIgualdad
-        : IGU_          {$$ = IGU;}       
-        | DIF_          {$$ = DIF;}       
+        : IGU_          {$$ = EIGUAL;}       
+        | DIF_          {$$ = EDIST;}       
         ;
 /****************************************************************************/
 operadorRelacional
-        : MAYOR_        {$$ = MAYOR;}
-        | MENOR_        {$$ = MENOR;}
-        | MAYORIG_      {$$ = MAYORIG;}
-        | MENORIG_      {$$ = MENORIG;}
+        : MAYOR_        {$$ = EMAY;}
+        | MENOR_        {$$ = EMEN;}
+        | MAYORIG_      {$$ = EMAYEQ;}
+        | MENORIG_      {$$ = EMENEQ;}
         ;
 /****************************************************************************/
 operadorAditivo
-        : MAS_          {$$ = MAS_UN;}
-        | MENOS_        {$$ = MENOS_UN;}
+        : MAS_          {$$ = ESUM;}
+        | MENOS_        {$$ = EDIF;}
         ;
 /****************************************************************************/
 operadorMultiplicativo
-        : POR_          {$$ = POR;}      
-        | DIV_          {$$ = DIV;}      
-        | MOD_          {$$ = MOD;}      
+        : POR_          {$$ = EMULT;}      
+        | DIV_          {$$ = EDIVI;}      
+        | MOD_          {$$ = RESTO;}      
         ;
 /****************************************************************************/
 operadorUnario
-        : MAS_          {$$ = MAS_UN;}
-        | MENOS_        {$$ = MENOS_UN;}
-        | NEG_          {$$ = NEG_UN;}      
+        : MAS_          {$$ = ESUM;}
+        | MENOS_        {$$ = ESIG;}
+        | NEG_          {$$ = EDIF;}      
         ;
 /****************************************************************************/
 operadorIncremento
-        : INCRE_        {$$ = INCRE;}
+        : INCRE_        {$$ = ESUM;}
         | DECRE_        {$$ = DECRE;}
         ;
 /****************************************************************************/
