@@ -28,9 +28,9 @@
 // #define PORASIG 3
 // #define DIVASIG 4
 
-// /****************************************** Operador Logico */
-// #define AND 0
-// #define OR 1
+/****************************************** Operador Logico */
+#define AND 0
+#define OR 1
 
 // /****************************************** Operador Igualdad */
 // #define IGU 0

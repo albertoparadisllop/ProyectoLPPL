@@ -201,15 +201,13 @@ expresion
 	        								yyerror(ERROR_VAR_NO_DECLARADA);
 	        							} else if(simb.tipo != $3.tipo) {
 	        								yyerror("Tipo inconsistente en expresión de asignación");
-	        							} else if( $2 == ASIG){
+	        							} else if( $2 == EASIG){
 	        								//Asignar
+	        								emite(EASIG,crArgPos($3.pos),crArgNul(),crArgPos(simb.desp));
 	        							} else if($3.tipo != T_ENTERO){
 	        								yyerror("Tipo no valido para asignacion con operación aritmética");
-	        							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-	        								//switch para cada tipo de operadorAsignacion excepto ASIG
-	        								
-	        							} else {
-	        								yyerror(ERROR_VAR_NO_INI);
+	        							} else { 
+	        								emite($2,crArgPos(simb.desp),crArgPos($3.pos),crArgPos(simb.desp));
 	        							}
 	        						}
         						}
@@ -230,12 +228,12 @@ expresion
 				    							} else if(dim.telem != $6.tipo) {
 				    								yyerror("Tipo inconsistente en expresión de asignación");
 				    							} else if( $5 == ASIG){
-				    								//Asignar
-				    							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-				    								//switch para cada tipo de operadorAsignacion excepto ASIG
-				    								
-				    							} else {
-				    								yyerror(ERROR_VAR_NO_INI);
+				    								emite(EVA,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($6.pos));
+				    							} else { //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
+				    								$$.pos = creaVarTemp()
+				    								emite(EAV,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
+				    								emite($5,crArgPos($$.pos),crArgPos($6.pos),crArgPos($$.pos));
+				    								emite(EVA,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
 				    							}
 				    						} else {
 				    							yyerror("Acceso vector sobre una variable no array");
@@ -258,16 +256,13 @@ expresion
 				    							} else if(camp.tipo != $5.tipo){
 				    								yyerror("Inconsistencia de tipos en asignacion en campo");
 				    							} else if( $4 == ASIG){
-				    								//Asignar
+				    								emite(EASIG,crArgPos($5.pos),crArgNul(),crArgPos(simb.desp+camp.desp));
 				    							} else if($5.tipo != T_ENTERO){
 			        								yyerror("Tipo no valido para asignacion con operación aritmética");
-			        							} else if(1){ //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-				    								//switch para cada tipo de operadorAsignacion excepto ASIG
-				    								
-				    								}
-				    							} else {
-				    								yyerror(ERROR_VAR_NO_INI);
-				    							}
+			        							} else {
+			        								emite($4,crArgPos(simb.desp+camp.desp),crArgPos($5.pos),crArgPos(simb.desp+camp.desp));
+			        							}
+				    							
 				    						} else {
 				    							yyerror("Acceso como estructura de una variable no estructura.");
 				    						}
@@ -386,20 +381,39 @@ expresionUnaria
         | operadorUnario expresionUnaria 	{ 
         										$$.tipo = T_ERROR;
 							                  	if($2.tipo != T_ERROR){
-							                        if ($1 == NEG_UN && $2.tipo != T_LOGICO){
+							                        if ($1 == EDIF && $2.tipo != T_LOGICO){
 					                                    yyerror("Operador negación debe ser aplicado a tipo lógico");
-					                                } else if (($1 == MAS_UN || $1 == MENOS_UN)  && $2.tipo != T_ENTERO){
-					                                    yyerror("Operador negación debe ser aplicado a tipo lógico");
+					                                } else if (($1 == ESUM || $1 == ESIG)  && $2.tipo != T_ENTERO){
+					                                    yyerror("Operador signo debe ser aplicado a tipo lógico");
 					                                } else {
+					                                	//Tipos estan bien
 					                                    $$.tipo = $2.tipo;
+					                                    $$.pos = creaVarTemp();
+					                                    if($1 == ESUM){
+					                                    	//Simbolo +
+					                                    	emite($1,crArgPos($2.pos),crArgEnt(0),crArgPos($$.pos));
+					                                    } else if($2 == ESIG){
+					                                    	//Simbolo -
+					                                    	emite($1,crArgPos($2.pos),crArgNul(),crArgPos($$.pos));
+					                                    } else {
+					                                    	//Simbolo !
+					                                    	emite($1,crArgEnt(1),crArgPos($2.pos),crArgPos($$.pos));
+					                                    }
 					                                }
 							                 	}
 							                }
-        | operadorIncremento ID_         {$$.tipo = T_ERROR;
-                                        SIMB simb = obtTdS($2);
-                                        if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
-                                        else if (simb.tipo == T_ENTERO){ 
+
+
+        | operadorIncremento ID_        {
+        									$$.tipo = T_ERROR;
+                                        	SIMB simb = obtTdS($2);
+                                        	if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
+                                        	else if (simb.tipo == T_ENTERO){ 
                                                  	$$.tipo = simb.tipo;
+                                                 	$$.pos = creaVarTemp();
+                                                 	emite($1,crArgPos(simb.desp),crArgEnt(1),crArgPos(simb.desp));
+                                                 	emite(EASIG,crArgPos(simb.desp),crArgNul(),crArgPos($$.pos));
+
                                                 } else {
                                                 	yyerror("Operacion unaria debe ser aplicada a un entero");
                                                 }
@@ -414,6 +428,11 @@ expresionSufija
                                         else if (simb.tipo == T_ERROR){yyerror("Objeto no declarado");}
                                         else{
                                                 $$.tipo = simb.tipo;
+                                                $$.pos = creaVarTemp();
+
+                                                emite(EASIG,crArgPos(simb.desp),crArgNul(),crArgPos($$.pos));
+                                                emite($2,crArgPos(simb.desp),crArgEnt(1),crArgPos(simb.desp));
+
                                         }
                         
 
@@ -426,7 +445,14 @@ expresionSufija
                                                         if($3.tipo == T_ENTERO){
                                                                 DIM arr = obtTdA(simb.ref);
                                                                 if (arr.telem == T_ERROR) {yyerror("Array no declarado");}
-                                                                else {$$.tipo = arr.telem;}
+                                                                else {
+                                                                	$$.tipo = arr.telem;
+                                                                	$$.pos = creaVarTemp();
+                                                                	/*emite(EMULT,crVarPos($3.pos),crVarEnt(TALLA_TIPO_SIMPLE),crVarPos($3.pos));
+                                                                	emite(ESUM,crVarEnt(simb.desp), crVarPos($3.pos),crVarPos($3.pos))
+                                                                	emite(EASIG,crVarPos(),crVarNul(),crVarPos($$.pos));*/
+                                                                	emite(EAV,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
+                                                                }
                                                         }
 
                                                 }else yyerror("Variable no es un array");
@@ -436,14 +462,16 @@ expresionSufija
 
                                 }
         | ID_       {
-                $$.tipo = T_ERROR;
-                SIMB sim = obtTdS($1);
-                if(sim.tipo == T_ERROR) {yyerror("Objeto no declarado");}
-                else {
-                        $$.tipo = sim.tipo;
-                }
+		                $$.tipo = T_ERROR;
+		                SIMB sim = obtTdS($1);
+		                if(sim.tipo == T_ERROR) {yyerror("Objeto no declarado");}
+		                else {
+		                        $$.tipo = sim.tipo;
+		                        $$.pos = creaVarTemp();
+		                        emite(EASIG,crArgPos(simb.desp),crVarNul(),crVarPos($$.pos));
+		                }
 
-                }                    
+                	}                    
         | ID_ PUNTO_ ID_  { $$.tipo = T_ERROR;
                             SIMB simb = obtTdS($1);
                             if (simb.tipo == T_ERROR) {yyerror("Estructura no declarado");}
@@ -453,6 +481,11 @@ expresionSufija
                                         if (simb2.tipo == T_ERROR){yyerror("Nombre de registro invalido");}
                                         else{
                                                 $$.tipo = simb2.tipo;
+                                                $$.pos = creaVarTemp();
+
+                                                //desplazamiento = simb2.desp
+                                                emite(EASIG,crArgPos(simb.desp + simb2.desp),crArgNul(),crVarPos($$.pos));
+
                                         }
 
                                 }
@@ -461,7 +494,10 @@ expresionSufija
 
 
                         }              
-        | constante   {$$.tipo = $1.tipo;}          
+        | constante   	{
+        					$$.tipo = $1.tipo;
+        					$$.pos = $1.pos;
+        				}          
         ;
 /****************************************************************************/
 constante
@@ -526,7 +562,7 @@ operadorUnario
 /****************************************************************************/
 operadorIncremento
         : INCRE_        {$$ = ESUM;}
-        | DECRE_        {$$ = DECRE;}
+        | DECRE_        {$$ = EDIF;}
         ;
 /****************************************************************************/
                 
