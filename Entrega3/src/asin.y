@@ -235,6 +235,7 @@ expresion
         							if($3.tipo != T_ERROR){
 	        							SIMB simb = obtTdS($1);
                                                                         $$.tipo = $3.tipo;
+									$$.pos = simb.desp;
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror(ERROR_VAR_NO_DECLARADA);
 	        							} else if(simb.tipo != $3.tipo) {
@@ -242,10 +243,12 @@ expresion
 	        							} else if( $2 == EASIG){
 	        								//Asignar
 	        								emite(EASIG,crArgPos($3.pos),crArgNul(),crArgPos(simb.desp));
+										//emite(EASIG,crArgPos($3.pos),crArgNul(),crArgPos($$.pos));
 	        							} else if($3.tipo != T_ENTERO){
 	        								yyerror("Tipo no valido para asignacion con operación aritmética");
 	        							} else { 
 	        								emite($2,crArgPos(simb.desp),crArgPos($3.pos),crArgPos(simb.desp));
+										//emite($2,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
 	        							}
 	        						}
         						}
@@ -255,6 +258,7 @@ expresion
         							if($6.tipo != T_ERROR){
 	        							SIMB simb = obtTdS($1);
                                                                         $$.tipo = $6.tipo;
+									$$.pos = creaVarTemp();
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror("Estructura no declarada");
 	        							} else {
@@ -268,8 +272,8 @@ expresion
 				    								yyerror("Tipo inconsistente en expresión de asignación");
 				    							} else if( $5 == EASIG){
 				    								emite(EVA,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($6.pos));
+												emite(EASIG,crArgPos($6.pos),crArgNul(),crArgPos($$.pos));
 				    							} else { //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-				    								$$.pos = creaVarTemp();
 				    								emite(EAV,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
 				    								emite($5,crArgPos($$.pos),crArgPos($6.pos),crArgPos($$.pos));
 				    								emite(EVA,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
@@ -285,22 +289,25 @@ expresion
         							$$.tipo = T_ERROR;
         							if($5.tipo != T_ERROR){
 	        							SIMB simb = obtTdS($1);
-                                                                        $$.tipo = $5.tipo;
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror("Registro no declarado");
 	        							} else {
         									if(simb.tipo == T_RECORD){
 	        									CAMP camp = obtTdR(simb.ref,$3);
+											$$.tipo = $5.tipo;
+											$$.pos = simb.desp+camp.desp;
 	        									if(camp.tipo == T_ERROR){
 	        										yyerror("Error campo no existente");
 				    							} else if(camp.tipo != $5.tipo){
 				    								yyerror("Inconsistencia de tipos en asignacion en campo");
 				    							} else if( $4 == EASIG){
 				    								emite(EASIG,crArgPos($5.pos),crArgNul(),crArgPos(simb.desp+camp.desp));
+												//emite(EASIG,crArgPos($5.pos),crArgNul(),crArgPos($$.pos));
 				    							} else if($5.tipo != T_ENTERO){
 			        								yyerror("Tipo no valido para asignacion con operación aritmética");
 			        							} else {
 			        								emite($4,crArgPos(simb.desp+camp.desp),crArgPos($5.pos),crArgPos(simb.desp+camp.desp));
+												//emite($4,crArgPos(simb.desp+camp.desp),crArgPos($5.pos),crArgPos($$.pos));
 			        							}
 				    							
 				    						} else {
