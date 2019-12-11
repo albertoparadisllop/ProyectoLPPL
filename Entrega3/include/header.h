@@ -95,5 +95,14 @@ typedef struct exp {
     int tipo;
 } EXP;
 
+/*************************** Struct para las instrucciones de rotura de flujo */
+typedef struct iter {
+    int ini;
+    int lf;
+    int lv;
+    int aux;
+    int fin;
+} ITER;
+
 #endif  /* _HEADER_H */
 /*****************************************************************************/

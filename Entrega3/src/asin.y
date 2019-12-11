@@ -14,6 +14,7 @@
         int cent;
         REG regi;
         EXP exp;
+        ITER iter;
 }
 
 /***************************PALABRAS ESPECIALES*******************************/
@@ -54,6 +55,7 @@ programa
                                         if(verTDS){
                                                 verTdS();
                                         }
+                                        emite(FIN,crArgNul(),crArgNul(),crArgNul());
                                 }
         ;
 /****************************************************************************/
@@ -155,14 +157,20 @@ listaInstrucciones
         ;
 /****************************************************************************/
 instruccionEntradaSalida
-        : READ_ PARA_ ID_ PARC_ PCOMA_ { SIMB simb = obtTdS($3);
-                                         if(simb.tipo == T_ERROR){ yyerror (ERROR_VAR_NO_DECLARADA);}
-                                         else {
-                                                if(simb.tipo != T_ENTERO){yyerror ("El argumento del Read debe ser entero");}
-                                              }
+        : READ_ PARA_ ID_ PARC_ PCOMA_ { 
+                                                SIMB simb = obtTdS($3);
+                                                if(simb.tipo == T_ERROR){ yyerror (ERROR_VAR_NO_DECLARADA);}
+                                                else {
+                                                        if(simb.tipo != T_ENTERO){yyerror ("El argumento del Read debe ser entero");}
+                                                }
+                                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.desp));
                                         } 
-        | PRINT_ PARA_ expresion PARC_ PCOMA_  { if ($3.tipo != T_ENTERO){
-                                                yyerror("El argumento del print debe ser un entero");}
+        | PRINT_ PARA_ expresion PARC_ PCOMA_  { 
+                                                        if ($3.tipo != T_ENTERO){
+                                                                yyerror("El argumento del print debe ser un entero");}
+                                                        
+                                                        emite(EWRITE,crArgNul(),crArgNul(),crArgPos($3.pos));
+
                                               }
         ; 
 /****************************************************************************/
@@ -171,18 +179,47 @@ instruccionSeleccion
                                             if($3.tipo != T_LOGICO && $3.tipo != T_ERROR){
                                                     yyerror("Error, tipo no lógico como condición en IF ELSE");
                                             }
-                                    } instruccion ELSE_ instruccion
+                                            $<iter>$.lf = creaLans(si);
+                                            emite(EIGUAL,crArgPos($3.pos),crArgEnt(0),crArgEtq(-1));
+                                    } 
+                                    
+                                    instruccion 
+
+                                    {
+                                            $<iter>$.fin = creaLans(si);
+                                            emite(GOTOS,crArgNul(),crArgNul(),crArgEtq(-1));
+                                            completaLans($<iter>$.lf,crArgEnt(si));
+                                    }
+
+                                    ELSE_ instruccion
+
+                                    {
+                                            completaLans($<iter>$.fin,crArgEnt(si));
+                                    }
                                                 
         ;
 /****************************************************************************/
 instruccionIteracion
-        :  WHILE_ PARA_ expresion PARC_ {
-                                                        if($3.tipo != T_LOGICO && $3.tipo != T_ERROR){
+        :  WHILE_ {$<iter>$.ini = si;} PARA_ expresion PARC_  
+                                                {
+                                                        if($4.tipo != T_LOGICO && $4.tipo != T_ERROR){
                                                                 yyerror("Error, tipo no lógico como condición en WHILE");
                                                         }
-                                                } instruccion     
+                                                        
+                                                        $<iter>$.lf = creaLans(si);
+                                                        //Si $4 == false, salimos del bucle
+                                                        emite(EIGUAL,crArgPos($4.pos),crArgEnt(0),crArgEtq(-1));
+                                                } 
+
+                                                instruccion   
                                                 
-        ;
+                                                {
+                                                        //Saltamos al principio del while
+                                                        emite(GOTOS,crArgNul(),crArgNul(),crArgEtq($<iter>2.ini));
+                                                        completaLans($<iter>$.lf,crArgEnt(si));
+
+                                                }
+                                                
         ;
 /****************************************************************************/
 instruccionExpresion
