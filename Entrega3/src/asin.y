@@ -190,13 +190,13 @@ instruccionSeleccion
                                     {
                                             $<iter>$.fin = creaLans(si);
                                             emite(GOTOS,crArgNul(),crArgNul(),crArgEtq(-1));
-                                            completaLans($<iter>$.lf,crArgEnt(si));
+                                            completaLans($<iter>5.lf,crArgEnt(si));
                                     }
 
                                     ELSE_ instruccion
 
                                     {
-                                            completaLans($<iter>$.fin,crArgEnt(si));
+                                            completaLans($<iter>7.fin,crArgEnt(si));
                                     }
                                                 
         ;
@@ -218,7 +218,7 @@ instruccionIteracion
                                                 {
                                                         //Saltamos al principio del while
                                                         emite(GOTOS,crArgNul(),crArgNul(),crArgEtq($<iter>2.ini));
-                                                        completaLans($<iter>$.lf,crArgEnt(si));
+                                                        completaLans($<iter>6.lf,crArgEnt(si));
 
                                                 }
                                                 
