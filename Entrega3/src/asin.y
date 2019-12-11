@@ -89,7 +89,9 @@ declaracion
                                                 yyerror(ERROR_ID_YA_DECLARADO);
                                         } else {
                                                 //FALTA ASIGNAR
-                                                dvar += TALLA_TIPO_SIMPLE;
+						SIMB simb = obtTdS($2);
+						emite(EASIG,crArgPos($4.pos),crArgNul(),crArgPos(simb.desp));
+						dvar += TALLA_TIPO_SIMPLE;
                                         }
                                 }
         | tipoSimple ID_ CORA_ CTE_ CORC_ PCOMA_
