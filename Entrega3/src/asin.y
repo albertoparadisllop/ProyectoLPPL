@@ -234,6 +234,7 @@ expresion
         							$$.tipo = T_ERROR;
         							if($3.tipo != T_ERROR){
 	        							SIMB simb = obtTdS($1);
+                                                                        $$.tipo = $3.tipo;
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror(ERROR_VAR_NO_DECLARADA);
 	        							} else if(simb.tipo != $3.tipo) {
@@ -253,6 +254,7 @@ expresion
         							$$.tipo = T_ERROR;
         							if($6.tipo != T_ERROR){
 	        							SIMB simb = obtTdS($1);
+                                                                        $$.tipo = $6.tipo;
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror("Estructura no declarada");
 	        							} else {
@@ -264,10 +266,10 @@ expresion
 				    								yyerror("Se debe acceder al array con un entero");
 				    							} else if(dim.telem != $6.tipo) {
 				    								yyerror("Tipo inconsistente en expresión de asignación");
-				    							} else if( $5 == ASIG){
+				    							} else if( $5 == EASIG){
 				    								emite(EVA,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($6.pos));
 				    							} else { //COMPROBAMOS SI ESTA DECLARADA LA VARIABLE
-				    								$$.pos = creaVarTemp()
+				    								$$.pos = creaVarTemp();
 				    								emite(EAV,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
 				    								emite($5,crArgPos($$.pos),crArgPos($6.pos),crArgPos($$.pos));
 				    								emite(EVA,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
@@ -283,6 +285,7 @@ expresion
         							$$.tipo = T_ERROR;
         							if($5.tipo != T_ERROR){
 	        							SIMB simb = obtTdS($1);
+                                                                        $$.tipo = $5.tipo;
 	        							if(simb.tipo == T_ERROR){
 	        								yyerror("Registro no declarado");
 	        							} else {
@@ -292,7 +295,7 @@ expresion
 	        										yyerror("Error campo no existente");
 				    							} else if(camp.tipo != $5.tipo){
 				    								yyerror("Inconsistencia de tipos en asignacion en campo");
-				    							} else if( $4 == ASIG){
+				    							} else if( $4 == EASIG){
 				    								emite(EASIG,crArgPos($5.pos),crArgNul(),crArgPos(simb.desp+camp.desp));
 				    							} else if($5.tipo != T_ENTERO){
 			        								yyerror("Tipo no valido para asignacion con operación aritmética");
@@ -429,7 +432,7 @@ expresionUnaria
 					                                    if($1 == ESUM){
 					                                    	//Simbolo +
 					                                    	emite($1,crArgPos($2.pos),crArgEnt(0),crArgPos($$.pos));
-					                                    } else if($2 == ESIG){
+					                                    } else if($1 == ESIG){
 					                                    	//Simbolo -
 					                                    	emite($1,crArgPos($2.pos),crArgNul(),crArgPos($$.pos));
 					                                    } else {
@@ -485,9 +488,9 @@ expresionSufija
                                                                 else {
                                                                 	$$.tipo = arr.telem;
                                                                 	$$.pos = creaVarTemp();
-                                                                	/*emite(EMULT,crVarPos($3.pos),crVarEnt(TALLA_TIPO_SIMPLE),crVarPos($3.pos));
-                                                                	emite(ESUM,crVarEnt(simb.desp), crVarPos($3.pos),crVarPos($3.pos))
-                                                                	emite(EASIG,crVarPos(),crVarNul(),crVarPos($$.pos));*/
+                                                                	/*emite(EMULT,crArgPos($3.pos),crVarEnt(TALLA_TIPO_SIMPLE),crArgPos($3.pos));
+                                                                	emite(ESUM,crVarEnt(simb.desp), crArgPos($3.pos),crArgPos($3.pos))
+                                                                	emite(EASIG,crArgPos(),crArgNul(),crArgPos($$.pos));*/
                                                                 	emite(EAV,crArgPos(simb.desp),crArgPos($3.pos),crArgPos($$.pos));
                                                                 }
                                                         }
@@ -505,7 +508,7 @@ expresionSufija
 		                else {
 		                        $$.tipo = sim.tipo;
 		                        $$.pos = creaVarTemp();
-		                        emite(EASIG,crArgPos(simb.desp),crVarNul(),crVarPos($$.pos));
+		                        emite(EASIG,crArgPos(sim.desp),crArgNul(),crArgPos($$.pos));
 		                }
 
                 	}                    
@@ -521,7 +524,7 @@ expresionSufija
                                                 $$.pos = creaVarTemp();
 
                                                 //desplazamiento = simb2.desp
-                                                emite(EASIG,crArgPos(simb.desp + simb2.desp),crArgNul(),crVarPos($$.pos));
+                                                emite(EASIG,crArgPos(simb.desp + simb2.desp),crArgNul(),crArgPos($$.pos));
 
                                         }
 
@@ -541,17 +544,17 @@ constante
         : CTE_         	{
         					$$.tipo = T_ENTERO;
         					$$.pos = creaVarTemp();
-        					emite(ASIG,crVarEnt($1),crVarNul(),crVarPos($$.pos));
+        					emite(EASIG,crArgEnt($1),crArgNul(),crArgPos($$.pos));
         				}
         | TRUE_        	{
         					$$.tipo = T_LOGICO;
         					$$.pos = creaVarTemp();
-        					emite(ASIG,crVarEnt(1),crVarNul(),crVarPos($$.pos));
+        					emite(EASIG,crArgEnt(1),crArgNul(),crArgPos($$.pos));
         				}
         | FALSE_       	{
         					$$.tipo = T_LOGICO;
         					$$.pos = creaVarTemp();
-        					emite(ASIG,crVarEnt(0),crVarNul(),crVarPos($$.pos));
+        					emite(EASIG,crArgEnt(0),crArgNul(),crArgPos($$.pos));
         				} 
         ;
 /****************************************************************************/
