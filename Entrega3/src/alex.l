@@ -71,11 +71,13 @@ comentario     \/\/.*
 {identificador} { yylval.ident = strdup(yytext); retornar (ID_);   	}
 {real}       	{ yylval.cent = atoi(yytext); 	retornar (CTE_);   	}
 {delimitador}  	{ if (verbosidad) ECHO; }
+^				{if(verbosidad){
+					printf("%d\t", yylineno);
+				}}
 .	       		{ /*if (verbosidad) printf("\nError [%d]: %s\n", yylineno, yytext);*/
 					char str[100] = {0};
 					strcat(strcat(strcat(str, "Caracter desconocido "), yytext),"\0");
 					yyerror(str); 
 				}
-
 %%
 
