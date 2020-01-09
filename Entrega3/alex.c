@@ -1071,7 +1071,7 @@ case 44:
 YY_RULE_SETUP
 #line 74 "src/alex.l"
 {if(verbosidad){
-					printf("\n%d\t", yylineno);
+					printf("\n%3d.- ", yylineno);
 				}}
 	YY_BREAK
 case 45:

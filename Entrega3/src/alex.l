@@ -72,7 +72,7 @@ comentario     \/\/.*
 {real}       	{ yylval.cent = atoi(yytext); 	retornar (CTE_);   	}
 {delimitador}  	{ if (verbosidad) ECHO; }
 "\n"				{if(verbosidad){
-					printf("\n%d\t", yylineno);
+					printf("\n%3d.- ", yylineno);
 				}}
 .	       		{ /*if (verbosidad) printf("\nError [%d]: %s\n", yylineno, yytext);*/
 					char str[100] = {0};
