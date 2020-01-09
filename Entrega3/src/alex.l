@@ -17,7 +17,7 @@
 %option nounput       
 %option yylineno  
 
-delimitador     [ \t\n]+
+delimitador     [ \t]+
 digito         [0-9]
 entero         {digito}+
 real           ({digito}+\.?{digito}*)|(\.{digito}+)
@@ -71,8 +71,8 @@ comentario     \/\/.*
 {identificador} { yylval.ident = strdup(yytext); retornar (ID_);   	}
 {real}       	{ yylval.cent = atoi(yytext); 	retornar (CTE_);   	}
 {delimitador}  	{ if (verbosidad) ECHO; }
-^				{if(verbosidad){
-					printf("%d\t", yylineno);
+"\n"				{if(verbosidad){
+					printf("\n%d\t", yylineno);
 				}}
 .	       		{ /*if (verbosidad) printf("\nError [%d]: %s\n", yylineno, yytext);*/
 					char str[100] = {0};
